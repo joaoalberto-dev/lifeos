@@ -1,29 +1,75 @@
-# Create T3 App
+# Life OS
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A personal note-taking application built with Next.js, featuring a rich WYSIWYG editor powered by Lexical.
 
-## What's next? How do I make an app with this?
+## Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- **Rich Text Editor**: WYSIWYG editor built with Lexical supporting:
+  - Text formatting (bold, italic)
+  - Floating toolbar that appears on text selection
+  - Clean, borderless design
+- **Note Persistence**: Server-side note saving with PostgreSQL database
+- **Modern UI**: Clean beige-themed interface with centered layout
+- **Real-time Editing**: Instant text formatting with visual feedback
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Tech Stack
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Editor**: Lexical (Meta's rich text editor framework)
+- **Database**: PostgreSQL with Drizzle ORM
+- **Styling**: Tailwind CSS
+- **Code Quality**: Biome for linting and formatting
 
-## Learn More
+## Database Schema
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### Notes Table
+- `id` - Auto-incrementing primary key
+- `content` - Text content of the note
+- `createdAt` - Timestamp when note was created
+- `updatedAt` - Timestamp when note was last updated
+- `deletedAt` - Soft delete timestamp (nullable)
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Getting Started
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-## How do I deploy this?
+2. **Set up database**:
+   - Create a PostgreSQL database
+   - Copy `.env.example` to `.env` and configure your DATABASE_URL
+   - Run database migrations:
+   ```bash
+   npm run db:push
+   ```
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+3. **Start development server**:
+   ```bash
+   npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) to start taking notes!
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run db:push` - Push database schema
+- `npm run db:studio` - Open Drizzle Studio
+- `npm run check` - Run Biome linting
+- `npm run typecheck` - Type checking
+
+## Architecture
+
+The application follows a clean architecture pattern:
+
+- **Components**: Reusable UI components in `src/components/`
+- **Server Actions**: Database operations in `src/app/actions.ts`
+- **Database**: Schema and connection in `src/server/db/`
+- **Styling**: Tailwind CSS with stone color palette
+
+## Contributing
+
+This project uses conventional commits for commit messages and Biome for code formatting and linting.
