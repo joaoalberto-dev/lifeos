@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { getNotes } from "~/app/actions";
 
 type Note = {
@@ -11,21 +11,31 @@ type Note = {
   deletedAt: Date | null;
 };
 
-export default function NotesList() {
+export type NotesListRef = {
+  refreshNotes: () => void;
+};
+
+const NotesList = forwardRef<NotesListRef>((props, ref) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchNotes() {
-      const result = await getNotes();
-      if (result.success) {
-        setNotes(result.notes);
-      }
-      setLoading(false);
+  const fetchNotes = async () => {
+    const result = await getNotes();
+    if (result.success) {
+      setNotes(result.notes);
     }
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchNotes();
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    refreshNotes: () => {
+      fetchNotes();
+    },
+  }));
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -65,4 +75,8 @@ export default function NotesList() {
       )}
     </div>
   );
-}
+});
+
+NotesList.displayName = 'NotesList';
+
+export default NotesList;
