@@ -9,7 +9,7 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListItemNode, ListNode } from "@lexical/list";
-import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND, $getRoot } from "lexical";
+import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND, $getRoot, $createParagraphNode } from "lexical";
 import { saveNote } from "~/app/actions";
 
 const theme = {
@@ -118,7 +118,7 @@ function onError(error: Error) {
   console.error(error);
 }
 
-export default function Editor() {
+export default function Editor({ onNoteSaved }: { onNoteSaved?: () => void }) {
   const [isSaving, setIsSaving] = useState(false);
 
   const initialConfig = {
@@ -131,13 +131,17 @@ export default function Editor() {
   return (
     <div className="w-full max-w-4xl mx-auto bg-stone-50 rounded-lg p-6">
       <LexicalComposer initialConfig={initialConfig}>
-        <EditorContent isSaving={isSaving} setIsSaving={setIsSaving} />
+        <EditorContent isSaving={isSaving} setIsSaving={setIsSaving} onNoteSaved={onNoteSaved} />
       </LexicalComposer>
     </div>
   );
 }
 
-function EditorContent({ isSaving, setIsSaving }: { isSaving: boolean; setIsSaving: (saving: boolean) => void }) {
+function EditorContent({ isSaving, setIsSaving, onNoteSaved }: { 
+  isSaving: boolean; 
+  setIsSaving: (saving: boolean) => void;
+  onNoteSaved?: () => void;
+}) {
   const [editor] = useLexicalComposerContext();
 
   const handleSave = async () => {
@@ -147,10 +151,26 @@ function EditorContent({ isSaving, setIsSaving }: { isSaving: boolean; setIsSavi
         return $getRoot().getTextContent();
       });
       
+      // Don't save empty notes
+      if (!content.trim()) {
+        setIsSaving(false);
+        return;
+      }
+      
       const result = await saveNote(content);
       
       if (result.success) {
         console.log("Note saved successfully:", result.noteId);
+        
+        // Clear the editor
+        editor.update(() => {
+          const root = $getRoot();
+          root.clear();
+          root.append($createParagraphNode());
+        });
+        
+        // Notify parent component to refetch notes
+        onNoteSaved?.();
       } else {
         console.error("Failed to save note:", result.error);
       }
