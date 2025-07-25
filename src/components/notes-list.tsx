@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getNotes } from "~/app/actions";
 
 type Note = {
@@ -11,31 +11,19 @@ type Note = {
   deletedAt: Date | null;
 };
 
-export type NotesListRef = {
-  refreshNotes: () => void;
-};
-
-const NotesList = forwardRef<NotesListRef>((props, ref) => {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchNotes = async () => {
-    const result = await getNotes();
-    if (result.success) {
-      setNotes(result.notes);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchNotes();
-  }, []);
-
-  useImperativeHandle(ref, () => ({
-    refreshNotes: () => {
-      fetchNotes();
+export default function NotesList() {
+  const { data: notesData, isLoading } = useQuery({
+    queryKey: ["notes"],
+    queryFn: async () => {
+      const result = await getNotes();
+      if (result.success) {
+        return result.notes;
+      }
+      throw new Error(result.error);
     },
-  }));
+  });
+
+  const notes = notesData || [];
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -46,7 +34,7 @@ const NotesList = forwardRef<NotesListRef>((props, ref) => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col space-y-2">
         {[1, 2, 3].map((i) => (
@@ -75,8 +63,4 @@ const NotesList = forwardRef<NotesListRef>((props, ref) => {
       )}
     </div>
   );
-});
-
-NotesList.displayName = 'NotesList';
-
-export default NotesList;
+}

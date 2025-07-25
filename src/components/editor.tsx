@@ -10,6 +10,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND, $getRoot, $createParagraphNode } from "lexical";
+import { useQueryClient } from "@tanstack/react-query";
 import { saveNote } from "~/app/actions";
 
 const theme = {
@@ -118,7 +119,7 @@ function onError(error: Error) {
   console.error(error);
 }
 
-export default function Editor({ onNoteSaved }: { onNoteSaved?: () => void }) {
+export default function Editor() {
   const [isSaving, setIsSaving] = useState(false);
 
   const initialConfig = {
@@ -131,18 +132,18 @@ export default function Editor({ onNoteSaved }: { onNoteSaved?: () => void }) {
   return (
     <div className="w-full max-w-4xl mx-auto bg-stone-50 rounded-lg p-6">
       <LexicalComposer initialConfig={initialConfig}>
-        <EditorContent isSaving={isSaving} setIsSaving={setIsSaving} onNoteSaved={onNoteSaved} />
+        <EditorContent isSaving={isSaving} setIsSaving={setIsSaving} />
       </LexicalComposer>
     </div>
   );
 }
 
-function EditorContent({ isSaving, setIsSaving, onNoteSaved }: { 
+function EditorContent({ isSaving, setIsSaving }: { 
   isSaving: boolean; 
   setIsSaving: (saving: boolean) => void;
-  onNoteSaved?: () => void;
 }) {
   const [editor] = useLexicalComposerContext();
+  const queryClient = useQueryClient();
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -169,8 +170,8 @@ function EditorContent({ isSaving, setIsSaving, onNoteSaved }: {
           root.append($createParagraphNode());
         });
         
-        // Notify parent component to refetch notes
-        onNoteSaved?.();
+        // Invalidate and refetch notes query
+        await queryClient.invalidateQueries({ queryKey: ["notes"] });
       } else {
         console.error("Failed to save note:", result.error);
       }
