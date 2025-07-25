@@ -9,6 +9,10 @@ A personal note-taking application built with Next.js, featuring a rich WYSIWYG 
   - Floating toolbar that appears on text selection
   - Clean, borderless design
 - **Note Persistence**: Server-side note saving with PostgreSQL database
+- **Notes List**: Minimalist sidebar showing saved notes as:
+  - Thin grey lines (30px) that expand on hover (50px)
+  - Date tooltips showing creation/update time
+  - Fixed positioning on the left side
 - **Modern UI**: Clean beige-themed interface with centered layout
 - **Real-time Editing**: Instant text formatting with visual feedback
 
